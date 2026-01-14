@@ -33,37 +33,32 @@ img.onload = function () {
     // 4. THE MAGIC FIX: Wait for layout to settle completely
     // We use a double-raf or timeout to ensure CSS rendering is done
     setTimeout(() => {
-        // Force Leaflet to re-read the container size (fixes the "Black Bar" / "Corner" bug)
+        // Force Leaflet to re-read the container size
         map.invalidateSize();
 
-        const mapSize = map.getSize();
+        // 4. ROBUST CENTERING via fitBounds
+        // This ensures the image is perfectly centered locally before we start zooming.
+        // It fixes the "offset" bug where the center is miscalculated manually.
+        map.fitBounds(imageBounds, { animate: false });
 
-        // Calculate scaling
+        // Now calculate zoom
+        const mapSize = map.getSize();
         const scaleX = mapSize.x / w;
         const scaleY = mapSize.y / h;
-
-        // Calculate the zoom level that COVERS the screen
         const coverZoom = Math.log2(Math.max(scaleX, scaleY));
+        const startZoom = coverZoom + 0.4;
 
-        // Boost it for that "70%" feeling requested
-        const startZoom = coverZoom + 0.4; // +0.4 is a nice cosmetic boost
+        console.log("Auto-centered via fitBounds. Zooming to:", startZoom);
 
-        console.log("Fix Applied. Map:", mapSize.x, "x", mapSize.y, "CoverZoom:", coverZoom);
+        // Zoom in to the boost level (keeps the center)
+        map.setZoom(startZoom, { animate: false });
 
-        // 5. Set Center & Zoom instantly
-        // Center of image is [h/2, w/2]
-        map.setView([h / 2, w / 2], startZoom, { animate: false });
-
-        // 6. Lock it down (Delay slightly so the view setting happens first without fighting bounds)
+        // 5. Apply Locks
         setTimeout(() => {
-            // Set limits so user can't see black areas
             map.setMinZoom(coverZoom);
-
-            // "Solid" walls
             map.setMaxBoundsViscosity(1.0);
             map.setMaxBounds(imageBounds);
-
-            console.log("Map Locked and Loaded.");
+            console.log("Constraints applied.");
         }, 100);
 
     }, 300); // 300ms wait ensures the modal/phone frame animation has settled
