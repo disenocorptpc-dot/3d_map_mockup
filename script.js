@@ -42,8 +42,9 @@ img.onload = function () {
         const scaleY = mapSize.y / h;
         const coverZoom = Math.log2(Math.max(scaleX, scaleY));
 
-        // Initial "Boost" (70% feel)
-        const startZoom = coverZoom + 0.5;
+        // Initial "Boost" (User requested ~70% start)
+        // Adjusting from 0.5 to 0.7 to get closer.
+        const startZoom = coverZoom + 0.7;
 
         console.log("Configuring Map. CoverZoom:", coverZoom);
 
