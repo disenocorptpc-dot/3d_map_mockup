@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Map Mobile Mockup</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+    crossorigin=""/>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="presentation-layer">
+        <h1 class="title">Interactive Map Preview</h1>
+        <p class="subtitle">Touch simulation & High Fidelity Rendering</p>
+    </div>
+
+    <!-- Phone Container -->
+    <div class="device-mockup">
+        <div class="device-frame">
+            <div class="device-notch"></div>
+            <div class="device-power"></div>
+            <div class="device-volume"></div>
+            <div class="device-screen">
+                <!-- UI Overlay (optional status bar, back button etc) -->
+                <div class="ui-status-bar">
+                    <span class="time">9:41</span>
+                    <div class="status-icons">
+                        <div class="signal"></div>
+                        <div class="wifi"></div>
+                        <div class="battery"></div>
+                    </div>
+                </div>
+
+                <!-- Back button / Nav overlay -->
+                <div class="ui-overlay-top">
+                    <!-- Example translucent back button -->
+                    <div class="back-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- The Map -->
+                <div id="map"></div>
+                
+                <!-- Example UI element: Bottom controls -->
+                <div class="ui-overlay-bottom">
+                    <div class="control-panel">
+                        <div class="control-btn active">Explore</div>
+                        <div class="control-btn">Layers</div>
+                        <div class="control-btn">Settings</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+    crossorigin=""></script>
+    <script src="script.js"></script>
+</body>
+</html>

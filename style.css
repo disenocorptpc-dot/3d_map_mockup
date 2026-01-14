@@ -1,0 +1,215 @@
+:root {
+    --primary-bg: #111111;
+    --accent-color: #6366f1;
+    --text-color: #ffffff;
+    --phone-bezel: #1a1a1a;
+    --phone-frame: #2d2d2d;
+    --screen-radius: 40px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at 50% 10%, #2a2a4a 0%, #000000 100%);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-color);
+    overflow: hidden;
+}
+
+.presentation-layer {
+    text-align: center;
+    margin-bottom: 40px;
+    z-index: 10;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+    background: linear-gradient(90deg, #fff, #aaa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    color: #888;
+    margin-top: 8px;
+}
+
+/* Device Mockup */
+.device-mockup {
+    position: relative;
+    width: 380px;
+    height: 780px;
+    background: var(--phone-bezel);
+    border-radius: 55px;
+    box-shadow: 
+        0 0 0 4px #333,
+        0 20px 50px -10px rgba(0,0,0,0.5),
+        0 50px 100px -20px rgba(0,0,0,0.8);
+    padding: 12px;
+    box-sizing: border-box;
+    transform: scale(0.9); /* Slight scale down to fit viewport just in case */
+    transition: transform 0.3s ease;
+}
+
+/* Outer frame border ring */
+.device-mockup::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 57px;
+    border: 2px solid rgba(255,255,255,0.1);
+    pointer-events: none;
+}
+
+.device-frame {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    border-radius: var(--screen-radius);
+    overflow: hidden; /* Clips the map */
+    position: relative;
+}
+
+.device-screen {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: #111;
+}
+
+/* Notch */
+.device-notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 30px;
+    background: var(--phone-bezel);
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+    z-index: 1000;
+}
+
+/* Status Bar */
+.ui-status-bar {
+    position: absolute;
+    top: 5px;
+    left: 0;
+    width: 100%;
+    padding: 0 25px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 900;
+    height: 40px;
+    color: white;
+}
+
+.status-icons {
+    display: flex;
+    gap: 6px;
+}
+.battery {
+    width: 20px;
+    height: 10px;
+    border: 1px solid white;
+    border-radius: 2px;
+    background: linear-gradient(90deg, white 60%, transparent 60%);
+}
+
+/* Map Container */
+#map {
+    width: 100%;
+    height: 100%;
+    background: #050505;
+    z-index: 1;
+}
+
+/* UI Overlays */
+.ui-overlay-top {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    z-index: 500;
+}
+
+.back-btn {
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.ui-overlay-bottom {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 500;
+    width: 90%;
+}
+
+.control-panel {
+    background: rgba(20, 20, 20, 0.6);
+    backdrop-filter: blur(15px);
+    border-radius: 24px;
+    padding: 8px;
+    display: flex;
+    justify-content: space-around;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.control-btn {
+    padding: 10px 20px;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 16px;
+}
+
+.control-btn.active {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-weight: 600;
+}
+
+.control-btn:hover {
+    color: white;
+}
+
+/* Leaflet Customization */
+.leaflet-control-attribution {
+    display: none !important; /* Hide for clean mockup look */
+}
+.leaflet-bar {
+    border: none !important;
+}
+.leaflet-bar a {
+    background: rgba(0,0,0,0.5) !important;
+    color: white !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    backdrop-filter: blur(5px);
+}
