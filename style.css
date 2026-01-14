@@ -20,6 +20,9 @@ body {
     font-family: 'Inter', sans-serif;
     color: var(--text-color);
     overflow: hidden;
+    /* Prevent browser bounce/overscroll */
+    overscroll-behavior: none;
+    touch-action: none;
 }
 
 .presentation-layer {
@@ -50,13 +53,14 @@ body {
     height: 780px;
     background: var(--phone-bezel);
     border-radius: 55px;
-    box-shadow: 
+    box-shadow:
         0 0 0 4px #333,
-        0 20px 50px -10px rgba(0,0,0,0.5),
-        0 50px 100px -20px rgba(0,0,0,0.8);
+        0 20px 50px -10px rgba(0, 0, 0, 0.5),
+        0 50px 100px -20px rgba(0, 0, 0, 0.8);
     padding: 12px;
     box-sizing: border-box;
-    transform: scale(0.9); /* Slight scale down to fit viewport just in case */
+    transform: scale(0.9);
+    /* Slight scale down to fit viewport just in case */
     transition: transform 0.3s ease;
 }
 
@@ -66,7 +70,7 @@ body {
     position: absolute;
     inset: -2px;
     border-radius: 57px;
-    border: 2px solid rgba(255,255,255,0.1);
+    border: 2px solid rgba(255, 255, 255, 0.1);
     pointer-events: none;
 }
 
@@ -75,7 +79,8 @@ body {
     height: 100%;
     background: #000;
     border-radius: var(--screen-radius);
-    overflow: hidden; /* Clips the map */
+    overflow: hidden;
+    /* Clips the map */
     position: relative;
 }
 
@@ -122,6 +127,7 @@ body {
     display: flex;
     gap: 6px;
 }
+
 .battery {
     width: 20px;
     height: 10px;
@@ -156,9 +162,9 @@ body {
     align-items: center;
     justify-content: center;
     color: white;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     cursor: pointer;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .ui-overlay-bottom {
@@ -177,21 +183,21 @@ body {
     padding: 8px;
     display: flex;
     justify-content: space-around;
-    border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .control-btn {
     padding: 10px 20px;
     font-size: 0.8rem;
-    color: rgba(255,255,255,0.6);
+    color: rgba(255, 255, 255, 0.6);
     cursor: pointer;
     transition: all 0.2s;
     border-radius: 16px;
 }
 
 .control-btn.active {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     color: white;
     font-weight: 600;
 }
@@ -202,14 +208,17 @@ body {
 
 /* Leaflet Customization */
 .leaflet-control-attribution {
-    display: none !important; /* Hide for clean mockup look */
+    display: none !important;
+    /* Hide for clean mockup look */
 }
+
 .leaflet-bar {
     border: none !important;
 }
+
 .leaflet-bar a {
-    background: rgba(0,0,0,0.5) !important;
+    background: rgba(0, 0, 0, 0.5) !important;
     color: white !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
     backdrop-filter: blur(5px);
 }
