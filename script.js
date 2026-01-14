@@ -48,12 +48,17 @@ img.onload = function () {
     const coverScale = Math.max(scaleX, scaleY);
     const coverZoom = Math.log2(coverScale);
 
-    // Set the view to center with the calculated "cover" zoom
-    map.setView([h / 2, w / 2], coverZoom);
+    // "no se vean zonas negras":
+    // 1. Prevent zooming out further than the cover level
+    map.setMinZoom(coverZoom);
 
-    // Restrict panning to the image area
-    // We pad the bounds slightly to allow bouncing effect without seeing too much background
+    // 2. Prevent dragging past the edges (no bouncing/elasticity)
+    // 1.0 means fully solid (no rubber band effect)
+    map.setMaxBoundsViscosity(1.0);
     map.setMaxBounds(bounds);
+
+    // Start view: "cover" (fills the screen). 
+    map.setView([h / 2, w / 2], coverZoom);
 };
 
 // Add custom zoom controls if needed, or rely on pinch-zoom
