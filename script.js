@@ -2,80 +2,74 @@
 const imageUrl = 'https://res.cloudinary.com/dkkeujoix/image/upload/v1768404876/map_yxv8zw.png';
 const mapContainer = 'map';
 
-// Initialize Map
-// We use a simple CRS (Coordinate Reference System) which maps [0,0] to [height, width]
+// Initialize Map with very loose constraints initially to prevent "lock out"
 const map = L.map(mapContainer, {
     crs: L.CRS.Simple,
-    minZoom: -5, // Allow zooming out much further to fit large images initially
-    maxZoom: 2,
+    minZoom: -10, // Extremely permissive start
+    maxZoom: 5,
     zoomSnap: 0.1,
     zoomDelta: 0.1,
     attributionControl: false,
-    zoomControl: false
+    zoomControl: false,
+    maxBoundsViscosity: 0 // No strict bounce yet
 });
 
-// Load the image to get dimensions
 const img = new Image();
 img.src = imageUrl;
 
-img.onerror = function () {
-    console.error("Error loading image from Cloudinary");
-    alert("Error loading map image. Please check your internet connection.");
-};
-
 img.onload = function () {
-    // Robust dimensions check using natural dims if available
+    // 1. Get accurate dimensions
     const w = img.naturalWidth || img.width;
     const h = img.naturalHeight || img.height;
 
-    if (!w || !h) {
-        console.error("Image dimensions invalid", w, h);
-        return;
-    }
-
-    // Force map to update its container size perception (fix for black screen offset)
-    map.invalidateSize();
-
-    // Define the map bounds: [0,0] bottom-left to [h, w] top-right
+    // 2. Define Bounds (Y-first for Lat, X-second for Lng)
     const southWest = [0, 0];
     const northEast = [h, w];
-    const bounds = L.latLngBounds(southWest, northEast);
+    const imageBounds = L.latLngBounds(southWest, northEast);
 
-    // Add overlay
-    L.imageOverlay(imageUrl, bounds).addTo(map);
+    // 3. Add Image
+    L.imageOverlay(imageUrl, imageBounds).addTo(map);
 
-    // --- ZOOM CALCULATIONS ---
-    const mapSize = map.getSize();
+    // 4. THE MAGIC FIX: Wait for layout to settle completely
+    // We use a double-raf or timeout to ensure CSS rendering is done
+    setTimeout(() => {
+        // Force Leaflet to re-read the container size (fixes the "Black Bar" / "Corner" bug)
+        map.invalidateSize();
 
-    // Ratios to fit width and height
-    const scaleX = mapSize.x / w;
-    const scaleY = mapSize.y / h;
+        const mapSize = map.getSize();
 
-    // coverZoom: The minimum zoom needed to fill the screen (0% black bars)
-    // We take the MAX of the scales to ensure we fill the LARGEST dimension
-    const coverZoom = Math.log2(Math.max(scaleX, scaleY));
+        // Calculate scaling
+        const scaleX = mapSize.x / w;
+        const scaleY = mapSize.y / h;
 
-    // startZoom: User requested "70%" / slightly zoomed in start.
-    // We add a boost factor (e.g., +0.5 zoom level) to start closer than "just fit".
-    // Adjust this value to control initial zoom tightness.
-    const zoomBoost = 0.5;
-    const startZoom = coverZoom + zoomBoost;
+        // Calculate the zoom level that COVERS the screen
+        const coverZoom = Math.log2(Math.max(scaleX, scaleY));
 
-    console.log("Dims:", w, h, "CoverZoom:", coverZoom, "StartZoom:", startZoom);
+        // Boost it for that "70%" feeling requested
+        const startZoom = coverZoom + 0.4; // +0.4 is a nice cosmetic boost
 
-    // 1. Set View CENTERED on the image
-    map.setView([h / 2, w / 2], startZoom);
+        console.log("Fix Applied. Map:", mapSize.x, "x", mapSize.y, "CoverZoom:", coverZoom);
 
-    // 2. Lock constraints
-    // minZoom = coverZoom. 
-    // This makes it IMPOSSIBLE to zoom out past the "fill screen" point.
-    map.setMinZoom(coverZoom);
+        // 5. Set Center & Zoom instantly
+        // Center of image is [h/2, w/2]
+        map.setView([h / 2, w / 2], startZoom, { animate: false });
 
-    // 3. Solid Bounds
-    // Prevent dragging outside the image area
-    // Viscosity 1.0 means fully solid (no bouncing/showing black background)
-    map.setMaxBoundsViscosity(1.0);
-    map.setMaxBounds(bounds);
+        // 6. Lock it down (Delay slightly so the view setting happens first without fighting bounds)
+        setTimeout(() => {
+            // Set limits so user can't see black areas
+            map.setMinZoom(coverZoom);
+
+            // "Solid" walls
+            map.setMaxBoundsViscosity(1.0);
+            map.setMaxBounds(imageBounds);
+
+            console.log("Map Locked and Loaded.");
+        }, 100);
+
+    }, 300); // 300ms wait ensures the modal/phone frame animation has settled
 };
 
-console.log("Map initialized in simulation mode.");
+// Handle window resize gracefully
+window.addEventListener('resize', () => {
+    map.invalidateSize();
+});
