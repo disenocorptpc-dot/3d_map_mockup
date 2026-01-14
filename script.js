@@ -24,54 +24,58 @@ img.onerror = function () {
 };
 
 img.onload = function () {
-    const w = img.width;
-    const h = img.height;
+    // Robust dimensions check using natural dims if available
+    const w = img.naturalWidth || img.width;
+    const h = img.naturalHeight || img.height;
 
     if (!w || !h) {
         console.error("Image dimensions invalid", w, h);
         return;
     }
 
-    // Define the map bounds based on image dimensions
+    // Force map to update its container size perception (fix for black screen offset)
+    map.invalidateSize();
+
+    // Define the map bounds: [0,0] bottom-left to [h, w] top-right
     const southWest = [0, 0];
     const northEast = [h, w];
-    const bounds = [southWest, northEast];
+    const bounds = L.latLngBounds(southWest, northEast);
 
-    // Add the image overlay
+    // Add overlay
     L.imageOverlay(imageUrl, bounds).addTo(map);
 
-    // --- LOGIC TO "COVER" / FILL THE SCREEN ---
+    // --- ZOOM CALCULATIONS ---
     const mapSize = map.getSize();
 
-    // Scale ratios
+    // Ratios to fit width and height
     const scaleX = mapSize.x / w;
     const scaleY = mapSize.y / h;
 
-    // Cover scale is the LARGER ratio to ensure filling the screen
-    const coverScale = Math.max(scaleX, scaleY);
-    const coverZoom = Math.log2(coverScale);
+    // coverZoom: The minimum zoom needed to fill the screen (0% black bars)
+    // We take the MAX of the scales to ensure we fill the LARGEST dimension
+    const coverZoom = Math.log2(Math.max(scaleX, scaleY));
 
-    console.log("Image Loaded:", w, "x", h);
-    console.log("Calculated Cover Zoom:", coverZoom);
+    // startZoom: User requested "70%" / slightly zoomed in start.
+    // We add a boost factor (e.g., +0.5 zoom level) to start closer than "just fit".
+    // Adjust this value to control initial zoom tightness.
+    const zoomBoost = 0.5;
+    const startZoom = coverZoom + zoomBoost;
 
-    // CRITICAL FIX: Set view FIRST, then set minZoom.
-    // If we set minZoom(X) when current zoom is < X, it might break.
-    // Setting view forces the map to jump to the correct spot.
-    map.setView([h / 2, w / 2], coverZoom);
+    console.log("Dims:", w, h, "CoverZoom:", coverZoom, "StartZoom:", startZoom);
 
-    // Now lock the zoom out limit
+    // 1. Set View CENTERED on the image
+    map.setView([h / 2, w / 2], startZoom);
+
+    // 2. Lock constraints
+    // minZoom = coverZoom. 
+    // This makes it IMPOSSIBLE to zoom out past the "fill screen" point.
     map.setMinZoom(coverZoom);
 
-    // Lock bounds after a slight delay to allow rendering to stabilize
-    // This prevents the "Black Screen" if the map thinks it's out of bounds initially
-    setTimeout(() => {
-        map.setMaxBoundsViscosity(1.0);
-        map.setMaxBounds(bounds);
-    }, 100);
+    // 3. Solid Bounds
+    // Prevent dragging outside the image area
+    // Viscosity 1.0 means fully solid (no bouncing/showing black background)
+    map.setMaxBoundsViscosity(1.0);
+    map.setMaxBounds(bounds);
 };
-
-// Add custom zoom controls if needed, or rely on pinch-zoom
-// We can add a simple scale control for fun
-// L.control.scale().addTo(map);
 
 console.log("Map initialized in simulation mode.");
