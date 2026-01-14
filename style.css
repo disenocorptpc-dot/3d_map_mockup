@@ -222,3 +222,77 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     backdrop-filter: blur(5px);
 }
+
+/* 
+   --------------------------------------------------------------
+   RESPONSIVE DESIGN (REAL MOBILE DEVICE)
+   --------------------------------------------------------------
+   When screen is narrower than 768px (tablets/phones), we assume
+   the user is ON a mobile device. We hide the "mockup" frame and
+   titles, making the map fullscreen for a native app feel.
+*/
+@media (max-width: 768px) {
+
+    /* Hide Presentation Title/Subtitle */
+    .presentation-layer {
+        display: none !important;
+    }
+
+    /* Transform the Mockup into Fullscreen Container */
+    .device-mockup {
+        width: 100vw !important;
+        height: 100vh !important;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        transform: none !important;
+        background: black !important;
+    }
+
+    /* Hide the outer ring */
+    .device-mockup::after {
+        display: none !important;
+    }
+
+    /* Reset internal frame */
+    .device-frame {
+        border-radius: 0 !important;
+    }
+
+    /* Hide Fake Hardware UI (Notch, Buttons) */
+    .device-notch {
+        display: none !important;
+    }
+
+    .device-power {
+        display: none !important;
+    }
+
+    .device-volume {
+        display: none !important;
+    }
+
+    /* Hide Fake Software UI (Status bar with 9:41 time) 
+       because the real phone has one! */
+    .ui-status-bar {
+        display: none !important;
+    }
+
+    /* Adjust actual UI element positioning for real screens */
+    .ui-overlay-top {
+        top: 20px !important;
+        /* Safe area margin */
+        left: 20px !important;
+    }
+
+    .ui-overlay-bottom {
+        bottom: 30px !important;
+        width: 92% !important;
+    }
+
+    /* Ensure body background feels native */
+    body {
+        background: black !important;
+    }
+}
