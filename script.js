@@ -1,133 +1,135 @@
-// Map Configuration - Local Tiles
+// Map Configuration - Cloudinary WebP Images
 const views = {
     front: {
-        url: 'tiles/front/{z}/{x}/{y}.png',
-        maxZoom: 6, // From tiler script output
-        dims: [6480, 11520] // Height, Width (Lat, Lng) - Wait, source was 11520x6480 (WxH)?
-        // Script output: Source dimensions: 11520x6480.
-        // Leaflet CRS.Simple: [0,0] to [Height, Width] usually?
-        // Let's verify Orientation. Standard Image: Width=X, Height=Y.
-        // Leaflet: Lat=Y, Lng=X.
-        // So bounds are [0,0] to [Height, Width].
-        // Bounds = [[0,0], [6480, 11520]]
+        url: 'https://res.cloudinary.com/dkkeujoix/image/upload/v1768581646/FrontFiltro-convertido-de-png_r8dofd.webp',
+        title: 'Vista Frontal'
     },
     perspective: {
-        url: 'tiles/perspective/{z}/{x}/{y}.png',
-        maxZoom: 6, // Assume same for now, script will confirm
-        dims: [6480, 11520] // Placeholder, update if different
+        url: 'https://res.cloudinary.com/dkkeujoix/image/upload/v1768581564/PerspectivaFinal-convertido-de-png_ifkfzl.webp',
+        title: 'Perspectiva'
     }
 };
 
-let currentView = 'front';
-const mapContainer = 'map';
+let currentViewId = 'front';
+let currentOverlay = null;
 
 // Initialize Map
-const map = L.map(mapContainer, {
+// We use a simple CRS (Coordinate Reference System) for flat images
+const map = L.map('map', {
     crs: L.CRS.Simple,
-    minZoom: 0, // Tiles usually start at 0
-    maxZoom: 6,
+    minZoom: -5, // Allow zooming out initially to see where we are
+    maxZoom: 2,  // Large high-res images usually don't need huge zoom numbers in standard Leaflet scale
     zoomSnap: 0.1,
     zoomDelta: 0.1,
     attributionControl: false,
     zoomControl: false,
-    bounceAtZoomLimits: false,
-    maxBoundsViscosity: 1.0
+    bounceAtZoomLimits: false, // Prevents rubber-banding
+    maxBoundsViscosity: 1.0    // Solid edges
 });
 
-let tileLayer = null;
+// Function to calculate the zoom level needed to cover the screen
+function getCoverZoom(imgWidth, imgHeight, mapWidth, mapHeight) {
+    const scaleX = mapWidth / imgWidth;
+    const scaleY = mapHeight / imgHeight;
+    // To cover (like object-fit: cover), we need the larger of the two scales
+    return Math.max(scaleX, scaleY); // Math.log2() if we were talking strictly zoom levels, but usage varies.
+    // In Leaflet CRS.Simple, zoom 0 means 1 pixel = 1 map unit? 
+    // Usually: zoom = Math.log2(scale).
+}
 
-function loadView(viewName) {
-    const view = views[viewName];
+function loadView(viewId) {
+    const view = views[viewId];
+    console.log(`Loading view: ${viewId}`);
 
-    // Remove old layer
-    if (tileLayer) {
-        map.removeLayer(tileLayer);
-    }
+    // Create a temporary image to get dimensions
+    const img = new Image();
+    img.src = view.url;
 
-    // 1. Define Bounds for this image
-    // Note: Script logic: "Source dimensions: 11520x6480" (WxH)
-    // Leaflet Bounds: southWest, northEast.
-    // southWest = [0,0]
-    // northEast = [Height, Width] = [6480, 11520]
-    // Wait, check tiler script logic again. 
-    // It generates standard tiles. Leaflet defaults to 256px tiles.
-    // L.CRS.Simple 1 unit = 1 pixel? 
-    // Start with strict L.tileLayer.
+    img.onload = function () {
+        const w = this.width;
+        const h = this.height;
+        console.log(`Image loaded: ${w}x${h}`);
 
-    // For tiled images in Leaflet with CRS.Simple, we usually use L.tileLayer 
-    // and we need to map the "world" correctly.
-    // Default L.CRS.Simple: 1 px = 1 map unit? No, depends on transformation.
-    // The safest way for "Big Image" is using a plugin like `Leaflet.Zoomify` or just configuring `tms: true` if needed.
-    // My script output: standard XYZ (top-left origin).
-    // Leaflet tileLayer default: top-left origin.
-    // So tiles should match.
+        // Define bounds for the image: [[0,0], [Height, Width]] for CRS.Simple
+        // Leaflet Y is often inverted or just top-down. 
+        // Standard L.imageOverlay bounds: [[south, west], [north, east]]
+        const bounds = [[0, 0], [h, w]];
 
-    // But we need to tell Leaflet how big the world is so it knows when to stop panning?
-    // And coordinate mapping:
-    // With L.CRS.Simple, projection is identity.
-    // So Lat 0 = Y 0. Lat 100 = Y 100.
-    // Lng 0 = X 0. Lng 100 = X 100.
+        // Remove previous layer
+        if (currentOverlay) {
+            map.removeLayer(currentOverlay);
+        }
 
-    // Image 11520x6480.
-    // Bounds: [[-6480, 0], [0, 11520]]? Leaflet Y goes up?
-    // L.CRS.Simple: "A simple CRS that maps longitude and latitude into x and y directly."
-    // "y" usually points UP in Cartesian?
-    // In standard Leaflet (Web Mercator), Y points up (Latitude).
-    // In L.CRS.Simple, it's just a grid.
+        // Add new Overlay
+        currentOverlay = L.imageOverlay(view.url, bounds).addTo(map);
 
-    // Let's assume standard image texturing: [0,0] is top-left.
-    // We need to map [0, -Height] to [Width, 0] or similar?
-    // Actually, let's look at `L.tileLayer` standard behavior for simple images.
-    // Often used: `L.tileLayer(url, { tms: false, noWrap: true })`.
-    // Coordinates: map.project([lat, lng], zoom).
+        // Configure Map Limits
+        map.setMaxBounds(bounds);
 
-    // SIMPLIFICATION:
-    // If we get it wrong, the map is upside down or displaced.
-    // For 120MB image, tiles are mandatory.
+        // Calculate "Cover" Zoom
+        // Logic: specific to preventing black bars
+        // We want the minimum zoom to be such that the image COVERS the viewport.
 
-    tileLayer = L.tileLayer(view.url, {
-        minZoom: 0,
-        maxZoom: view.maxZoom,
-        noWrap: true,
-        bounds: [[-view.dims[0], 0], [0, view.dims[1]]] // Try negative Y for "top-left" memory
-    }).addTo(map);
+        function updateZoomLogic() {
+            const mapSize = map.getSize(); // Pixels
+            // CRS.Simple: At zoom 0, 1 lat/lng unit = 1 pixel.
+            // Image is w x h units.
 
-    // Fit bounds initially
-    // If we use negative Y for height (common in graphics vs generic cartesian)
-    const h = view.dims[0]; // 6480
-    const w = view.dims[1]; // 11520
-    const bounds = [[-h, 0], [0, w]];
+            // To fit width: zoom factor = mapSize.x / w
+            // To fit height: zoom factor = mapSize.y / h
+            // Zoom Level = Math.log2(factor)
 
-    map.setMaxBounds(bounds);
-    map.fitBounds(bounds);
+            const zoomX = Math.log2(mapSize.x / w);
+            const zoomY = Math.log2(mapSize.y / h);
 
-    // Zoom logic similar to before but adapted for tiles
-    // Tiles 0 is whole world in 256px?
-    // My script calculated max_zoom=6 for 1:1.
-    // Zoom 0 = 180x101 px (tiny).
+            // "Cover" means we take the larger zoom (zoomed out less, or zoomed in more?)
+            // We want to FILL the screen, so we need the larger scale.
+            const coverZoom = Math.max(zoomX, zoomY);
 
-    // So "Fill Screen" zoom will be around 2 or 3?
-    // Let's rely on fitBounds + slight zoom in.
+            // Set MinZoom so user can't zoom out to black bars
+            map.setMinZoom(coverZoom);
 
-    setTimeout(() => {
-        map.fitBounds(bounds);
-        const z = map.getZoom();
-        map.setZoom(z + 0.5); // Boost
-    }, 100);
+            // Initial Zoom: The user likes it "70% zoomed in" (closer)
+            // Or just nicely centered. Let's start at coverZoom + a bit.
+            const startZoom = coverZoom + 0.4;
+
+            map.setView([h / 2, w / 2], startZoom);
+        }
+
+        // Delay slightly ensuring container is sized
+        setTimeout(() => {
+            map.invalidateSize();
+            updateZoomLogic();
+        }, 100);
+    };
+
+    img.onerror = function () {
+        console.error("Error loading image from Cloudinary");
+        alert("Error loading the high-res map. Please check connection.");
+    };
 }
 
 // Initial Load
-// We need to fetch dimensions or hardcode them?
-// The script outputs dimensions. 
-// Front: 11520x6480.
-// Perspective: Let's assume similar or checking.
-loadView('front');
+loadView(currentViewId);
 
-// Toggle Handler
-document.getElementById('viewToggle').addEventListener('click', () => {
-    currentView = currentView === 'front' ? 'perspective' : 'front';
-    loadView(currentView);
+// View Switcher Logic
+const toggleBtn = document.getElementById('viewToggle');
+const toggleText = toggleBtn.querySelector('.text');
+
+toggleBtn.addEventListener('click', () => {
+    // Switch ID
+    currentViewId = currentViewId === 'front' ? 'perspective' : 'front';
+
+    // Update Text (Show what NEXT click will do? Or current?)
+    // Usually buttons show what they DO. "Switch to Perspective".
+    // Or just "Change View" generic.
+    // Let's keep generic for now to keep it simple, or toggle text.
+
+    loadView(currentViewId);
 });
 
-// Update dims for Perspective if needed (Checking later)
-views.perspective.dims = [6480, 11520]; // Assuming same layout for now
+// Handle window resize
+window.addEventListener('resize', () => {
+    map.invalidateSize();
+    // Re-run zoom logic? Ideally yes, but map handles simple resizing okay.
+});
