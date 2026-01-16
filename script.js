@@ -105,6 +105,10 @@ function loadView(viewId) {
             let startCenter = [h / 2, w / 2];
             if (view.focus) {
                 startCenter = view.focus;
+                // DIAGNÓSTICO: Dibujar un pin donde debería estar el centro
+                L.marker(view.focus).addTo(map)
+                    .bindPopup(`Punto Objetivo: ${view.focus}`)
+                    .openPopup();
             }
 
             map.setView(startCenter, targetZoom);
