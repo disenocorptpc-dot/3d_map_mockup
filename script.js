@@ -19,10 +19,10 @@ let currentOverlay = null;
 
 // Developer Helper: Haz clic en el mapa para ver las coordenadas en la consola (F12)
 // Úsalo para encontrar tu punto perfecto y ponerlo en la config de arriba.
-// map.on('click', (e) => {
-//    console.log(`Coordenada elegida: [${Math.round(e.latlng.lat)}, ${Math.round(e.latlng.lng)}]`);
-//    alert(`Coordenadas: [${Math.round(e.latlng.lat)}, ${Math.round(e.latlng.lng)}] \n(Cópialas para configurar el inicio)`);
-// });
+map.on('click', (e) => {
+    console.log(`Coordenada elegida: [${Math.round(e.latlng.lat)}, ${Math.round(e.latlng.lng)}]`);
+    alert(`Coordenadas: [${Math.round(e.latlng.lat)}, ${Math.round(e.latlng.lng)}] \n(Cópialas para configurar el inicio)`);
+});
 
 // Initialize Map
 // We use a simple CRS (Coordinate Reference System) for flat images
