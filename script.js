@@ -3,14 +3,12 @@ const views = {
     front: {
         url: 'https://res.cloudinary.com/dkkeujoix/image/upload/v1768581646/FrontFiltro-convertido-de-png_r8dofd.webp',
         title: 'Vista Frontal',
-        // Opcional: Coordenadas [Y, X] exactas donde quieres iniciar. 
-        // Si lo dejas comentado, se centra automático.
-        // focus: [3240, 5760] 
+        focus: [1754, 4853]
     },
     perspective: {
         url: 'https://res.cloudinary.com/dkkeujoix/image/upload/v1768581564/PerspectivaFinal-convertido-de-png_ifkfzl.webp',
         title: 'Perspectiva',
-        // focus: [2000, 4000]
+        focus: [1087, 5963]
     }
 };
 
@@ -29,13 +27,6 @@ const map = L.map('map', {
     zoomControl: false,
     bounceAtZoomLimits: false, // Prevents rubber-banding
     maxBoundsViscosity: 1.0    // Solid edges
-});
-
-// Developer Helper: Haz clic en el mapa para ver las coordenadas en la consola (F12)
-// Úsalo para encontrar tu punto perfecto y ponerlo en la config de arriba.
-map.on('click', (e) => {
-    console.log(`Coordenada elegida: [${Math.round(e.latlng.lat)}, ${Math.round(e.latlng.lng)}]`);
-    alert(`Coordenadas: [${Math.round(e.latlng.lat)}, ${Math.round(e.latlng.lng)}] \n(Cópialas para configurar el inicio)`);
 });
 
 // Function to calculate the zoom level needed to cover the screen
