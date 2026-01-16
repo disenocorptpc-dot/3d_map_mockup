@@ -2,16 +2,27 @@
 const views = {
     front: {
         url: 'https://res.cloudinary.com/dkkeujoix/image/upload/v1768581646/FrontFiltro-convertido-de-png_r8dofd.webp',
-        title: 'Vista Frontal'
+        title: 'Vista Frontal',
+        // Opcional: Coordenadas [Y, X] exactas donde quieres iniciar. 
+        // Si lo dejas comentado, se centra automático.
+        // focus: [3240, 5760] 
     },
     perspective: {
         url: 'https://res.cloudinary.com/dkkeujoix/image/upload/v1768581564/PerspectivaFinal-convertido-de-png_ifkfzl.webp',
-        title: 'Perspectiva'
+        title: 'Perspectiva',
+        // focus: [2000, 4000]
     }
 };
 
 let currentViewId = 'front';
 let currentOverlay = null;
+
+// Developer Helper: Haz clic en el mapa para ver las coordenadas en la consola (F12)
+// Úsalo para encontrar tu punto perfecto y ponerlo en la config de arriba.
+// map.on('click', (e) => {
+//    console.log(`Coordenada elegida: [${Math.round(e.latlng.lat)}, ${Math.round(e.latlng.lng)}]`);
+//    alert(`Coordenadas: [${Math.round(e.latlng.lat)}, ${Math.round(e.latlng.lng)}] \n(Cópialas para configurar el inicio)`);
+// });
 
 // Initialize Map
 // We use a simple CRS (Coordinate Reference System) for flat images
@@ -99,7 +110,13 @@ function loadView(viewId) {
             // Safety cap: ensure we don't zoom in TOO close if the difference is huge.
             const targetZoom = coverZoom + ((map.getMaxZoom() - coverZoom) * 0.7);
 
-            map.setView([h / 2, w / 2], targetZoom);
+            // Determinar punto de inicio (Custom o Centro)
+            let startCenter = [h / 2, w / 2];
+            if (view.focus) {
+                startCenter = view.focus;
+            }
+
+            map.setView(startCenter, targetZoom);
         }
 
         // Delay slightly ensuring container is sized
