@@ -89,11 +89,17 @@ function loadView(viewId) {
             // Set MinZoom so user can't zoom out to black bars
             map.setMinZoom(coverZoom);
 
-            // Initial Zoom: The user likes it "70% zoomed in" (closer)
-            // Or just nicely centered. Let's start at coverZoom + a bit.
-            const startZoom = coverZoom + 0.4;
+            // "70% Zoom" Calculation:
+            // Define the range between "Cover" (0%) and "Max Detail" (100% / zoom level 2)
+            // But since maxZoom is arbitrary (2), let's say 100% is where image is native scale (zoom 0 approx?).
+            // Let's rely on standard logic: coverZoom + (0.7 * (map.getMaxZoom() - coverZoom))?
+            // MaxZoom is 2. CoverZoom might be -2. Range = 4. 70% of 4 = 2.8. Start = -2 + 2.8 = 0.8.
+            // This is a good heuristic.
 
-            map.setView([h / 2, w / 2], startZoom);
+            // Safety cap: ensure we don't zoom in TOO close if the difference is huge.
+            const targetZoom = coverZoom + ((map.getMaxZoom() - coverZoom) * 0.7);
+
+            map.setView([h / 2, w / 2], targetZoom);
         }
 
         // Delay slightly ensuring container is sized
