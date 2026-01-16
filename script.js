@@ -3,12 +3,14 @@ const views = {
     front: {
         url: 'https://res.cloudinary.com/dkkeujoix/image/upload/v1768581646/FrontFiltro-convertido-de-png_r8dofd.webp',
         title: 'Vista Frontal',
-        focus: [1640, 4660]
+        focus: [1063, 5890],
+        zoom: -0.90
     },
     perspective: {
         url: 'https://res.cloudinary.com/dkkeujoix/image/upload/v1768581564/PerspectivaFinal-convertido-de-png_ifkfzl.webp',
         title: 'Perspectiva',
-        focus: [912, 5663]
+        focus: [959, 7242],
+        zoom: -0.50
     }
 };
 
@@ -91,15 +93,13 @@ function loadView(viewId) {
             // Set MinZoom so user can't zoom out to black bars
             map.setMinZoom(coverZoom);
 
-            // "70% Zoom" Calculation:
-            // Define the range between "Cover" (0%) and "Max Detail" (100% / zoom level 2)
-            // But since maxZoom is arbitrary (2), let's say 100% is where image is native scale (zoom 0 approx?).
-            // Let's rely on standard logic: coverZoom + (0.7 * (map.getMaxZoom() - coverZoom))?
-            // MaxZoom is 2. CoverZoom might be -2. Range = 4. 70% of 4 = 2.8. Start = -2 + 2.8 = 0.8.
-            // This is a good heuristic.
+            // Zoom por defecto (calculado o manual)
+            let finalZoom = coverZoom + ((map.getMaxZoom() - coverZoom) * 0.7);
 
-            // Safety cap: ensure we don't zoom in TOO close if the difference is huge.
-            const targetZoom = coverZoom + ((map.getMaxZoom() - coverZoom) * 0.7);
+            // Si el usuario definió un zoom manual, úsalo.
+            if (view.zoom !== undefined) {
+                finalZoom = view.zoom;
+            }
 
             // Determinar punto de inicio (Custom o Centro)
             let startCenter = [h / 2, w / 2];
@@ -107,7 +107,7 @@ function loadView(viewId) {
                 startCenter = view.focus;
             }
 
-            map.setView(startCenter, targetZoom);
+            map.setView(startCenter, finalZoom);
         }
 
         // Delay slightly ensuring container is sized
@@ -125,30 +125,6 @@ function loadView(viewId) {
 
 // Initial Load
 loadView(currentViewId);
-
-// Developer Helper: Botón para capturar la vista exacta
-// Agrégalo temporalmente al DOM
-const debugBtn = document.createElement('button');
-debugBtn.innerText = '📍 Capturar Vista Actual';
-debugBtn.style.position = 'fixed';
-debugBtn.style.top = '100px';
-debugBtn.style.left = '50%';
-debugBtn.style.transform = 'translateX(-50%)';
-debugBtn.style.zIndex = '9999';
-debugBtn.style.padding = '10px 20px';
-debugBtn.style.background = 'red';
-debugBtn.style.color = 'white';
-debugBtn.style.border = 'none';
-debugBtn.style.borderRadius = '5px';
-debugBtn.style.fontWeight = 'bold';
-debugBtn.onclick = () => {
-    const center = map.getCenter();
-    const zoom = map.getZoom();
-    const config = `focus: [${Math.round(center.lat)}, ${Math.round(center.lng)}], zoom: ${zoom.toFixed(2)}`;
-    console.log(config);
-    alert(`Copia esto EXACTO:\n\n${config}`);
-};
-document.body.appendChild(debugBtn);
 
 // View Switcher Logic
 const toggleBtn = document.getElementById('viewToggle');
