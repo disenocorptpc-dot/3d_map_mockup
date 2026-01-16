@@ -3,12 +3,12 @@ const views = {
     front: {
         url: 'https://res.cloudinary.com/dkkeujoix/image/upload/v1768581646/FrontFiltro-convertido-de-png_r8dofd.webp',
         title: 'Vista Frontal',
-        focus: [1754, 4853]
+        focus: [1640, 4660]
     },
     perspective: {
         url: 'https://res.cloudinary.com/dkkeujoix/image/upload/v1768581564/PerspectivaFinal-convertido-de-png_ifkfzl.webp',
         title: 'Perspectiva',
-        focus: [1087, 5963]
+        focus: [912, 5663]
     }
 };
 
@@ -105,16 +105,6 @@ function loadView(viewId) {
             let startCenter = [h / 2, w / 2];
             if (view.focus) {
                 startCenter = view.focus;
-                // DIAGNÓSTICO MEJORADO: Pin Arrastrable
-                const marker = L.marker(view.focus, { draggable: true }).addTo(map);
-                marker.bindPopup(`¡Arrástrame al punto correcto!`).openPopup();
-
-                marker.on('dragend', function (event) {
-                    const position = marker.getLatLng();
-                    const coords = `[${Math.round(position.lat)}, ${Math.round(position.lng)}]`;
-                    console.log("Nuevas coordenadas:", coords);
-                    alert(`Nuevas Coordenadas: ${coords}\n(Cópialas y pásaselas a tu asistente)`);
-                });
             }
 
             map.setView(startCenter, targetZoom);
