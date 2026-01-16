@@ -126,6 +126,30 @@ function loadView(viewId) {
 // Initial Load
 loadView(currentViewId);
 
+// Developer Helper: Botón para capturar la vista exacta
+// Agrégalo temporalmente al DOM
+const debugBtn = document.createElement('button');
+debugBtn.innerText = '📍 Capturar Vista Actual';
+debugBtn.style.position = 'fixed';
+debugBtn.style.top = '100px';
+debugBtn.style.left = '50%';
+debugBtn.style.transform = 'translateX(-50%)';
+debugBtn.style.zIndex = '9999';
+debugBtn.style.padding = '10px 20px';
+debugBtn.style.background = 'red';
+debugBtn.style.color = 'white';
+debugBtn.style.border = 'none';
+debugBtn.style.borderRadius = '5px';
+debugBtn.style.fontWeight = 'bold';
+debugBtn.onclick = () => {
+    const center = map.getCenter();
+    const zoom = map.getZoom();
+    const config = `focus: [${Math.round(center.lat)}, ${Math.round(center.lng)}], zoom: ${zoom.toFixed(2)}`;
+    console.log(config);
+    alert(`Copia esto EXACTO:\n\n${config}`);
+};
+document.body.appendChild(debugBtn);
+
 // View Switcher Logic
 const toggleBtn = document.getElementById('viewToggle');
 const toggleText = toggleBtn.querySelector('.text');
